@@ -18,6 +18,10 @@ type Config struct {
 	DBName     string
 	DBSSLMode  string
 
+	// Cloud SQL
+	CloudSQLEnabled  bool
+	CloudSQLInstance string // format: project:region:instance
+
 	// Health Check
 	HealthCheckCacheTTL time.Duration
 
@@ -36,8 +40,11 @@ func Load() *Config {
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "scraper"),
+		DBName:     getEnv("DB_NAME", "myapp"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
+
+		CloudSQLEnabled:  getBoolEnv("CLOUDSQL_ENABLED", false),
+		CloudSQLInstance: getEnv("CLOUDSQL_INSTANCE", "cloudsql-sv:asia-northeast1:postgres-prod"),
 
 		HealthCheckCacheTTL: getDurationEnv("HEALTH_CHECK_CACHE_TTL", 30*time.Second),
 		VPSBearerToken:      getEnv("VPS_BEARER_TOKEN", ""),
@@ -61,6 +68,13 @@ func getDurationEnv(key string, defaultValue time.Duration) time.Duration {
 		if seconds, err := strconv.Atoi(value); err == nil {
 			return time.Duration(seconds) * time.Second
 		}
+	}
+	return defaultValue
+}
+
+func getBoolEnv(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		return value == "true" || value == "1"
 	}
 	return defaultValue
 }

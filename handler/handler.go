@@ -2,11 +2,14 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"time"
+
+	"google.golang.org/api/idtoken"
 
 	"lb-scrape/config"
 	"lb-scrape/service"
@@ -86,8 +89,27 @@ func (h *Handler) Scrape(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
+
+	// Set authentication header
 	if h.cfg.VPSBearerToken != "" {
+		// Use static bearer token if configured
 		httpReq.Header.Set("Authorization", "Bearer "+h.cfg.VPSBearerToken)
+	} else {
+		// Use IAM authentication (ID token)
+		ctx := context.Background()
+		tokenSource, err := idtoken.NewTokenSource(ctx, target.URL)
+		if err != nil {
+			log.Printf("failed to create token source: %v", err)
+			h.handleVPSError(w, req.JobID, "failed to create IAM token")
+			return
+		}
+		token, err := tokenSource.Token()
+		if err != nil {
+			log.Printf("failed to get ID token: %v", err)
+			h.handleVPSError(w, req.JobID, "failed to get IAM token")
+			return
+		}
+		httpReq.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	}
 
 	resp, err := h.client.Do(httpReq)

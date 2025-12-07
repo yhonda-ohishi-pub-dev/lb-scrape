@@ -1,0 +1,8 @@
+port: "8080"
+db_user: "747065218280-compute@developer.gserviceaccount.com"
+db_name: "myapp"
+cloudsql_enabled: true
+cloudsql_instance: "cloudsql-sv:asia-northeast1:postgres-prod"
+health_check_cache_ttl: 30
+vps_request_timeout: 55
+# vps_bearer_token: IAM認証使用のため不要

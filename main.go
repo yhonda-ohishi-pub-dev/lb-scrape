@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -16,15 +18,41 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
+	ctx := context.Background()
+
+	// Load config
+	var cfg *config.Config
+	var err error
+
+	if config.UseParameterManager() {
+		project := config.GetProjectID()
+		paramName := config.GetParameterName()
+		cfg, err = config.LoadFromParameterManager(ctx, project, paramName)
+		if err != nil {
+			log.Fatalf("failed to load config from Parameter Manager: %v", err)
+		}
+		log.Printf("loaded config from Parameter Manager: %s/%s", project, paramName)
+	} else {
+		cfg = config.Load()
+	}
 
 	// Connect to database
-	database, err := db.Connect(cfg.DSN())
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+	var database *sql.DB
+
+	if cfg.CloudSQLEnabled {
+		database, err = db.ConnectCloudSQL(ctx, cfg.CloudSQLInstance, cfg.DBUser, cfg.DBName)
+		if err != nil {
+			log.Fatalf("failed to connect to Cloud SQL: %v", err)
+		}
+		log.Printf("connected to Cloud SQL: %s", cfg.CloudSQLInstance)
+	} else {
+		database, err = db.Connect(cfg.DSN())
+		if err != nil {
+			log.Fatalf("failed to connect to database: %v", err)
+		}
+		log.Println("connected to database")
 	}
 	defer database.Close()
-	log.Println("connected to database")
 
 	// Initialize services
 	lb := service.NewLoadBalancer(database)
