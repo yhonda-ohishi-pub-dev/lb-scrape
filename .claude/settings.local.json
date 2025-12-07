@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod tidy:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File deploy.ps1)",
+      "Bash(go build:*)",
+      "Bash(./etc-scraper.exe:*)",
+      "Bash(powershell -Command \"$GCLOUD = \"\"$env:LOCALAPPDATA\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.cmd\"\"; & $GCLOUD compute ssh instance-20251207-115015 --zone=asia-northeast1-b --command=''grpcurl -plaintext localhost:50051 scraper.ETCScraper/Health''\")",
+      "Bash(mkdir:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
