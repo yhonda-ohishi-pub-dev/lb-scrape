@@ -27,11 +27,12 @@ func main() {
 	if config.UseParameterManager() {
 		project := config.GetProjectID()
 		paramName := config.GetParameterName()
-		cfg, err = config.LoadFromParameterManager(ctx, project, paramName)
+		paramVersion := config.GetParameterVersion()
+		cfg, err = config.LoadFromParameterManager(ctx, project, paramName, paramVersion)
 		if err != nil {
 			log.Fatalf("failed to load config from Parameter Manager: %v", err)
 		}
-		log.Printf("loaded config from Parameter Manager: %s/%s", project, paramName)
+		log.Printf("loaded config from Parameter Manager: %s/%s/%s", project, paramName, paramVersion)
 	} else {
 		cfg = config.Load()
 	}

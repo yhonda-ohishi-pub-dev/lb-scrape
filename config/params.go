@@ -24,7 +24,7 @@ type ParameterConfig struct {
 }
 
 // LoadFromParameterManager loads config from GCP Parameter Manager
-func LoadFromParameterManager(ctx context.Context, project, paramName string) (*Config, error) {
+func LoadFromParameterManager(ctx context.Context, project, paramName, version string) (*Config, error) {
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create parameter manager client: %w", err)
@@ -32,7 +32,7 @@ func LoadFromParameterManager(ctx context.Context, project, paramName string) (*
 	defer client.Close()
 
 	// Render parameter version to get resolved values (including secret references)
-	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s/versions/latest", project, paramName)
+	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s/versions/%s", project, paramName, version)
 	req := &parametermanagerpb.RenderParameterVersionRequest{
 		Name: name,
 	}
@@ -86,6 +86,11 @@ func GetProjectID() string {
 // GetParameterName returns the parameter name from env
 func GetParameterName() string {
 	return getEnv("PARAM_NAME", "lb-scrape-config")
+}
+
+// GetParameterVersion returns the parameter version from env
+func GetParameterVersion() string {
+	return getEnv("PARAM_VERSION", "latest")
 }
 
 // UseParameterManager returns true if Parameter Manager should be used
