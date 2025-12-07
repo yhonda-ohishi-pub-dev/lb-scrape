@@ -6,7 +6,11 @@
       "Bash(go build:*)",
       "Bash(./etc-scraper.exe:*)",
       "Bash(powershell -Command \"$GCLOUD = \"\"$env:LOCALAPPDATA\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.cmd\"\"; & $GCLOUD compute ssh instance-20251207-115015 --zone=asia-northeast1-b --command=''grpcurl -plaintext localhost:50051 scraper.ETCScraper/Health''\")",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(USE_PARAM_MANAGER=true go run:*)",
+      "Bash(DB_HOST=127.0.0.1 DB_PORT=5432 DB_USER=postgres DB_NAME=myapp DB_SSLMODE=disable DB_PASSWORD=postgres CLOUDSQL_ENABLED=false go run:*)",
+      "Bash(psql:*)",
+      "Bash(protoc:*)"
     ],
     "deny": [],
     "ask": []

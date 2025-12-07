@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package scraper;
+
+option go_package = "lb-scrape/pkg/pb;pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// Target represents a VPS scraper endpoint
+message Target {
+  int64 id = 1;
+  string name = 2;
+  string url = 3;
+  bool healthy = 4;
+  optional google.protobuf.Timestamp last_checked = 5;
+}
+
+// TargetWithLoad includes running job count
+message TargetWithLoad {
+  Target target = 1;
+  int32 running_count = 2;
+}
+
+// ScrapeRequest for executing a scraping job
+message ScrapeRequest {
+  int64 job_id = 1;
+  string job_type = 2;
+  google.protobuf.Struct payload = 3;
+}
+
+// ScrapeResponse from the scraping operation
+message ScrapeResponse {
+  bool success = 1;
+  google.protobuf.Struct data = 2;
+  string error = 3;
+}
+
+// HealthRequest for health check
+message HealthRequest {}
+
+// HealthResponse for health check
+message HealthResponse {
+  string status = 1;
+  google.protobuf.Timestamp time = 2;
+}
+
+// TargetsStatusRequest for getting all targets status
+message TargetsStatusRequest {}
+
+// TargetStatus with live health info
+message TargetStatus {
+  int64 id = 1;
+  string name = 2;
+  string url = 3;
+  bool healthy = 4;
+  int32 running_jobs = 5;
+  optional google.protobuf.Timestamp last_checked = 6;
+  bool live_healthy = 7;
+}
+
+// TargetsStatusResponse with all targets
+message TargetsStatusResponse {
+  repeated TargetStatus targets = 1;
+  google.protobuf.Timestamp time = 2;
+}
+
+// ScraperService provides load-balanced scraping operations
+service ScraperService {
+  // Scrape executes a scraping job on the best available target
+  rpc Scrape(ScrapeRequest) returns (ScrapeResponse);
+
+  // Health returns the health status of the load balancer
+  rpc Health(HealthRequest) returns (HealthResponse);
+
+  // TargetsStatus returns the status of all VPS targets
+  rpc TargetsStatus(TargetsStatusRequest) returns (TargetsStatusResponse);
+}
